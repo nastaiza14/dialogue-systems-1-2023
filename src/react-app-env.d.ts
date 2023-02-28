@@ -45,6 +45,8 @@ interface SDSContext {
   accept: any;
   decline: any;
   request: any;
+  data: any;
+  information: any;
 }
 
 type SDSEvent =

@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-const defaultPassivity = 5;
+const defaultPassivity = 10;
 
 const machine = createMachine(
   {
@@ -278,15 +278,15 @@ function App({ domElement }: any) {
         /* console.log('Ready to receive a voice input.'); */
       },
       recStop: (context) => {
-        context.asr.abort?.();
+        context.asr.abort();
         /* console.log('Recognition stopped.'); */
       },
       ttsStart: (context) => {
         let content = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="en-US"><voice name="${context.voice.name}">`;
         content =
           content +
-          (context.parameters.ttsLexicon
-            ? `<lexicon uri="${context.parameters.ttsLexicon}"/>`
+          (process.env.REACT_APP_TTS_LEXICON
+            ? `<lexicon uri="${process.env.REACT_APP_TTS_LEXICON}"/>`
             : "");
         content = content + `${context.ttsAgenda}</voice></speak>`;
         const utterance = new context.ttsUtterance(content);
@@ -308,7 +308,7 @@ function App({ domElement }: any) {
           },
         });
         context.asr = new SpeechRecognition();
-        context.asr.lang = context.parameters.asrLanguage || "en-US";
+        context.asr.lang = process.env.REACT_APP_ASR_LANGUAGE || "en-US";
         context.asr.continuous = true;
         context.asr.interimResults = true;
         context.asr.onresult = function (event: any) {

@@ -35,13 +35,18 @@ const grammar: Grammar = {
     intent: "time",
     entities: { time: "10" },
   },
-  "who was jesus?": {
-    intent: "query",
-    entities: { question: "Jesus" },
-  },
+  //// check
+  // "who is ${} ?": {
+  //   intent: "query",
+  //   entities: { question: "{}" },
+  //  },
   "who is tom cruise?": {
     intent: "query",
     entities: { question: "Tom Cruise" },
+  },
+  "who is alicia vikander?": {
+    intent: "query",
+    entities: { question: "Alicia Vikander" },
   },
   "yes": {
     intent: "answer",
@@ -59,6 +64,10 @@ const grammar: Grammar = {
     intent: "yes",
     entities: { query: "query" },
   },
+  // request: {
+  //   intent: "info",
+  //   entities: { info: {} }
+  // }
 };
 
 const getEntity = (context: SDSContext, entity: string) => {
@@ -146,7 +155,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
             }),
           },
           {
-            target: "meeting",
+            target: "meeting.when",
             cond: (context) => !!getEntity(context, "accept"),
             actions: assign({
               accept: (context) => getEntity(context, "accept"),
@@ -173,20 +182,20 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         understood: {
           // Using invoke here
           invoke: {
-            id: "kbRequest",
-            src: (context) => kbRequest(context.question),
-            onDone: {
+            src: (context, event) => kbRequest(context.question),
+            // Where would the result of kbRequest go if we hadn't used the condition?
+            onDone: [{
               target: "speak_request",
-              // Why is "request" undefined if we have updated the context in the previous step?
+              cond: (context, event) => event.data.Abstract !== "",
               actions: assign({
-               request: (context) => (context.request) })
-            },
+               request: (context, event) => event.data }),
+            }],
           },
         },
         speak_request: {
           entry: send((context) => ({
                 type: "SPEAK",
-                value: `${(context.request)}`,
+                value: `${(context.request.Abstract)}`,
               })),
               on: { ENDSPEECH: "meet_person" }
         },
@@ -201,6 +210,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           entry: sayErrorBack,
           on: { ENDSPEECH: "ask" },
         },
+        // information: {}
       },
     },
     meeting: {
@@ -282,6 +292,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           entry: say("What time is your meeting?"),
           on: { ENDSPEECH: "ask" } 
         },
+        // To do: assign "title" as "question" when it is undefined (meaning that we come from the meet_person state in query)
         confirmation: {
           entry: send((context) => ({
             type: "SPEAK",
@@ -304,4 +315,4 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
       },
     },
   },
-}
+};
