@@ -9,66 +9,6 @@ function say(text: string): Action<SDSContext, SDSEvent> {
   return send((_context: SDSContext) => ({ type: "SPEAK", value: text }));
 }
 
-// interface Grammar {
-//   [index: string]: {
-//     intent: string;
-//     entities: {
-//       [index: string]: string;
-//     };
-//   };
-// }
-
-// const grammar: Grammar = {
-//   "lecture": {
-//     intent: "meeting",
-//     entities: { title: "lecture" },
-//   },
-//   // "lunch": {
-//   //   intent: "meeting",
-//   //   entities: { title: "lunch" },
-//   // },
-//   "friday": {
-//     intent: "friday",
-//     entities: { day: "friday" },
-//   },
-//   "10": {
-//     intent: "time",
-//     entities: { time: "10" },
-//   },
-//   "who is X": {
-//     intent: "query",
-//     entities: { question: "..." },
-//   },
-//   "yes": {
-//     intent: "answer",
-//     entities: { accept: "yes" },
-//   },
-//   "no": {
-//     intent: "no",
-//     entities: { decline: "no" },
-//   },
-//   // "create a meeting": {
-//   //   intent: "meeting",
-//   //   entities: { meeting: "meeting" },
-//   // },
-//   // "query": {
-//   //   intent: "yes",
-//   //   entities: { query: "query" },
-//   // },
-// };
-
-// const getEntity = (context: SDSContext, entity: string) => {
-//   // lowercase the utterance and remove tailing "."
-//   let u = context.recResult[0].utterance.toLowerCase().replace(/\.$/g, "");
-//   if (u in grammar) {
-//     if (entity in grammar[u].entities) {
-//       return grammar[u].entities[entity];
-//     }
-//   }
-//   return false;
-// };
-
-
 const kbRequest = (text: string) =>
   fetch(
     new Request(
@@ -97,7 +37,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         RECOGNISED: [
           {
             target: "query",
-            cond: (context) => (context.nluResult.prediction.topIntent) === "who is X",
+            cond: (context) => (context.nluResult.prediction.topIntent) === "query",
           },
           { 
             target: "meeting",
@@ -123,16 +63,15 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         },
       },
     },
-    // 3 level nested states can't refer to root states, redesign:
     query: {
       initial: "question",
       on: {
         RECOGNISED: [
           {
             target: ".understood",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === "name",
+            cond: (context) => (context.nluResult.prediction.entities[0].category).includes("name"),
             actions: assign({
-              question: (context) => (context.nluResult.prediction.entities),
+              title: (context) => (context.nluResult.prediction.entities[0].text),
             }),
           },
           //{
@@ -160,7 +99,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
             target: "init",
             cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
             actions: assign({
-              accept: (context) => (context.nluResult.prediction.entities[0].text),
+              decline: (context) => (context.nluResult.prediction.entities[0].text),
             }),
           },
           {
@@ -171,14 +110,12 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
       },
       states: {
         question: {
-          entry: say("Please, repeat the question."),
+          entry: say("So, tell me your question."),
           on: { ENDSPEECH: "ask" },
         },
         understood: {
-          // Using invoke here
           invoke: {
-            src: (context, event) => kbRequest(context.question),
-            // Where would the result of kbRequest go if we hadn't used the condition?
+            src: (context, event) => kbRequest(context.title),
             onDone: [{
               target: "speak_request",
               cond: (context, event) => event.data.Abstract !== "",
@@ -219,48 +156,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
               title: (context) => (context.nluResult.prediction.entities[0].text),
             }),
           },
-          //{
-          //  target: ".whole_day",
-          //  cond: (context) => !!getEntity(context, "day"),
-          //  actions: assign({
-          //    day: (context) => getEntity(context, "day"),
-          //  }),
-          //},
-          //{
-          //  target: ".time",
-          //  cond: (context) => !!getEntity(context, "decline"),
-          //  actions: assign({
-          //    decline: (context) => getEntity(context, "decline"),
-          //  }),
-          //},
-          //{
-          //  target: ".finalized",
-          //  cond: (context) => !!getEntity(context, "accept"),
-          //  actions: assign({
-          //    accept: (context) => getEntity(context, "accept"),
-          //  }),
-          //},
-          //{
-          //  target: ".confirmation",
-          //  cond: (context) => !!getEntity(context, "time"),
-          //  actions: assign({
-          //    time: (context) => getEntity(context, "time"),
-          //  }),
-          //},
-          //{
-          //  target: ".finalized",
-          //  cond: (context) => !!getEntity(context, "accept"),
-          //  actions: assign({
-          //    accept: (context) => getEntity(context, "accept"),
-          //  }),
-          //},
-          //{
-          //  target: ".what",
-          //  cond: (context) => !!getEntity(context, "decline"),
-          //  actions: assign({
-          //    decline: (context) => getEntity(context, "decline"),
-          //  }),
-          //},
           {
             target: ".whole_day",
             cond: (context) => (context.nluResult.prediction.entities[0].category) === "day",
@@ -284,7 +179,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           },
           {
             target: ".confirmation",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === "time",
+            cond: (context) => (context.nluResult.prediction.entities[0].category) === ("time"),
             actions: assign({
               time: (context) => (context.nluResult.prediction.entities[0].text),
             }),
@@ -329,7 +224,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           entry: say("What time is your meeting?"),
           on: { ENDSPEECH: "ask" } 
         },
-        // To do: assign "title" as "question" when it is undefined (meaning that we come from the meet_person state in query)
         confirmation: {
           entry: send((context) => ({
             type: "SPEAK",
@@ -337,7 +231,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           })),
           on: { ENDSPEECH: "ask" } 
         },
-        // Refering to upper state "init" with ^init doesn't work
         finalized: {
           entry: say("Your meeting has been created!"),
           //on: { ENDSPEECH: "init" }
