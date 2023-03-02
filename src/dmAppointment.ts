@@ -73,7 +73,7 @@ const kbRequest = (text: string) =>
   ).then((data) => data.json());
 
 const getPartialString = (context: SDSContext) => {
-  let u = context.recResult[0].utterance.toLowerCase().replace(/\.$/g, "");
+  let u = context.recResult[0].utterance.toLowerCase().replace(/\?$/g, "");
   if (u.includes("who is")) {
       return u.replace("who is ", "");
   }
