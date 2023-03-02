@@ -147,7 +147,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
             target: ".understood",
             cond: (context) => !!getPartialString(context),
             actions: assign({
-              question: (context) => getPartialString(context),
+              title: (context) => getPartialString(context),
             }),
           },
           {
@@ -178,7 +178,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         understood: {
           // Using invoke here
           invoke: {
-            src: (context, event) => kbRequest(context.question),
+            src: (context, event) => kbRequest(context.title),
             // Where would the result of kbRequest go if we hadn't used the condition?
             onDone: [{
               target: "speak_request",
@@ -295,6 +295,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           })),
           on: { ENDSPEECH: "ask" } 
         },
+      
         // Refering to upper state "init" with ^init doesn't work
         finalized: {
           entry: say("Your meeting has been created!"),
