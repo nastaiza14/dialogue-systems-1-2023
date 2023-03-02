@@ -35,23 +35,6 @@ const grammar: Grammar = {
     intent: "time",
     entities: { time: "10" },
   },
-  //// check
-  // "who is ${} ?": {
-  //   intent: "query",
-  //   entities: { question: "{}" },
-  //  },
-  "who was luis de gongora?": {
-    intent: "query",
-    entities: { question: "Luis de Góngora" },
-  },
-  "who is tom cruise?": {
-    intent: "query",
-    entities: { question: "Tom Cruise" },
-  },
-  "who is alicia vikander?": {
-    intent: "query",
-    entities: { question: "Alicia Vikander" },
-  },
   "yes": {
     intent: "answer",
     entities: { accept: "yes" },
@@ -68,10 +51,6 @@ const grammar: Grammar = {
     intent: "yes",
     entities: { query: "query" },
   },
-  // request: {
-  //   intent: "info",
-  //   entities: { info: {} }
-  // }
 };
 
 const getEntity = (context: SDSContext, entity: string) => {
@@ -92,6 +71,19 @@ const kbRequest = (text: string) =>
       `https://cors.eu.org/https://api.duckduckgo.com/?q=${text}&format=json&skip_disambig=1`
     )
   ).then((data) => data.json());
+
+const getPartialString = (context: SDSContext) => {
+  let u = context.recResult[0].utterance.toLowerCase().replace(/\.$/g, "");
+  if (u.includes("who is")) {
+      return u.replace("who is ", "");
+  }
+  else if (u.includes("who was")) {
+    return u.replace("who was ", "");
+  }
+  else {
+    return false
+  }
+};
 
 
 export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
@@ -153,9 +145,9 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         RECOGNISED: [
           {
             target: ".understood",
-            cond: (context) => !!getEntity(context, "question"),
+            cond: (context) => !!getPartialString(context),
             actions: assign({
-              question: (context) => getEntity(context, "question"),
+              question: (context) => getPartialString(context),
             }),
           },
           {
@@ -214,7 +206,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           entry: sayErrorBack,
           on: { ENDSPEECH: "ask" },
         },
-        // information: {}
       },
     },
     meeting: {
