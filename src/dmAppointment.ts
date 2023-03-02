@@ -40,6 +40,10 @@ const grammar: Grammar = {
   //   intent: "query",
   //   entities: { question: "{}" },
   //  },
+  "who was luis de gongora?": {
+    intent: "query",
+    entities: { question: "Luis de Góngora" },
+  },
   "who is tom cruise?": {
     intent: "query",
     entities: { question: "Tom Cruise" },
