@@ -1,0 +1,14 @@
+<!--ID=B7267351-473F-409D-9765-754A8EBCDE05;Version=1|{"VoiceNameToIdMapItems":[{"Id":"19eaa6ae-0655-4704-928b-28e1f1b917b2","Name":"Microsoft Server Speech Text to Speech Voice (en-US, JennyMultilingualNeural)","ShortName":"en-US-JennyMultilingualNeural","Locale":"en-US","VoiceType":"StandardVoice"},{"Id":"b5f86142-ce84-4483-8142-45db0d778add","Name":"Microsoft Server Speech Text to Speech Voice (en-US, DavisNeural)","ShortName":"en-US-DavisNeural","Locale":"en-US","VoiceType":"StandardVoice"}]}-->
+<!--ID=FCB40C2B-1F9F-4C26-B1A1-CF8E67BE07D1;Version=1|{"Files":{}}-->
+<!--ID=5B95B1CC-2C7B-494F-B746-CF22A0E779B7;Version=1|{"Locales":{"en-US":{"AutoApplyCustomLexiconFiles":[{}]}}}-->
+<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="en-US-JennyMultilingualNeural">I have your calendar open!<break strength="medium" /></voice>
+<voice name="en-US-DavisNeural">Um,  I want to create a meeting.<break strength="medium" /></voice>
+<voice name="en-US-JennyMultilingualNeural">For what date?<break strength="medium" /></voice>
+<voice name="en-US-DavisNeural">It's on Monday the sixth.<break strength="medium" /></voice>
+<voice name="en-US-JennyMultilingualNeural">What time would you like to start?<break strength="medium" /></voice>
+<voice name="en-US-DavisNeural">At ten.<break strength="medium" /></voice>
+<voice name="en-US-JennyMultilingualNeural">How much time do you want to block out?<break strength="medium" /></voice>
+<voice name="en-US-DavisNeural">Uh, about 2 hours.<break strength="medium" /></voice>
+<voice name="en-US-JennyMultilingualNeural">What shall we call this?<break strength="medium" /></voice>
+<voice name="en-US-DavisNeural">Um ,<break strength="weak" />meeting with thesis supervisor.<break strength="medium" /></voice>
+<voice name="en-US-JennyMultilingualNeural">Ok. <prosody contour="(17%, +25%) (30%, +6%) (44%, +44%)">An event for Monday,</prosody><break strength="weak" /> <prosody contour="(94%, +29%)">at 10 AM, </prosody><prosody contour="(71%, +61%)"> for 2 hours</prosody>,<break strength="weak" /> <prosody contour="(78%, +45%)">called "meeting with thesis supervisors"</prosody>, <prosody contour="(38%, +50%) (64%, +19%)">has been added to your calendar.</prosody></voice></speak>

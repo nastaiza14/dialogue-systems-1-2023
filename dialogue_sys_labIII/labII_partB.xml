@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lexicon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd" version="1.0" alphabet="ipa" xml:lang="en-US" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon">
+  <lexeme>
+    <grapheme>Góngora</grapheme>
+    <phoneme>ˈgoŋ.go.ra</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>y Argote</grapheme>
+    <alias>yArgote</alias>
+  </lexeme>
+  <lexeme>
+    <grapheme>yArgote</grapheme>
+    <phoneme>i.ar.ˈɣo.te</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>Quevedo</grapheme>
+    <phoneme>ke.ˈβe.ðo</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>culteranismo</grapheme>
+    <phoneme>kul.te.ra.ˈniz.mo</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>Gongorismo</grapheme>
+    <phoneme>goŋ.go.ˈriz.mo</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>conceptismo</grapheme>
+    <phoneme>kon.θep.ˈtiz.mo</phoneme>
+  </lexeme>
+</lexicon>

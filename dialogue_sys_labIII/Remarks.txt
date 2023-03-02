@@ -1,0 +1,29 @@
+ABOUT TTS Platform:
+
+Microsoft, Azure Cognitive Services, Speech Studio.
+
+
+ABOUT LEXICON:
+
+Mispronounced words > When requesting information about Luis de Góngora, a Spanish poet, Spanish proper names and nouns are mispronounced, those are:
+
+Góngora
+Y Argote
+Quevedo
+Gongorismo
+Culteranismo
+Conceptismo
+
+Phonetic form:
+'goŋ go ra 
+i ar 'ɣo te 
+ke 'βe ðo 
+goŋ go 'riz mo 
+kul te ra 'niz mo 
+kon θep 'tiz mo
+
+Public link: https://cvoiceprodneu.blob.core.windows.net/acc-public-files/d0d9c420766f4f5ca736afac5955b5e4/c7bbcf7a-1eeb-474e-9ac7-673356ef9310.xml
+
+ABOUT POEM REFERENCE:
+
+https://www.youtube.com/watch?v=w-sM-t1KI_Y
