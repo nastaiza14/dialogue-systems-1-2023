@@ -47,6 +47,11 @@ interface SDSContext {
   request: any;
   data: any;
   information: any;
+  help: any;
+  count: number;
+  welcome: any;
+  query: any;
+  meeting: any;
 }
 
 type SDSEvent =
