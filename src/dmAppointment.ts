@@ -36,12 +36,16 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
       on: {
         RECOGNISED: [
           {
+            target: ".nomatch",
+            cond: (context) => (context.nluResult.prediction.entities.length) === 0,
+          },
+          {
             target: "query",
             cond: (context) => (context.nluResult.prediction.topIntent) === "query",
           },
           { 
             target: "meeting",
-            cond: (context) => (context.nluResult.prediction.topIntent) === "create a meeting",
+            cond: (context) => (context.nluResult.prediction.topIntent) === "create a meeting" && (context.nluResult.prediction.entities[0].category) === "meeting",
           },
           {
             target: ".nomatch",
@@ -51,7 +55,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
       },
       states: {
         prompt: {
-          entry: say("Hi, Aya! Tell me, what do you need today?"),
+          entry: say("Hi, Aya! Tell me, what do you need today: schedule a meeting or make a query?"),
           on: { ENDSPEECH: "ask" },
         },
         ask: {
@@ -68,26 +72,16 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
       on: {
         RECOGNISED: [
           {
+            target: ".no_matches",
+            cond: (context) => (context.nluResult.prediction.entities.length) === 0,
+          },
+          {
             target: ".understood",
-            cond: (context) => (context.nluResult.prediction.entities[0].category).includes("name"),
+            cond: (context) => (context.nluResult.prediction.topIntent) === "who is X" && (context.nluResult.prediction.entities[0].category) === "name",
             actions: assign({
               title: (context) => (context.nluResult.prediction.entities[0].text),
             }),
           },
-          //{
-          //  target: "meeting.when",
-          //  cond: (context) => !!getEntity(context, "accept"),
-          //  actions: assign({
-          //    accept: (context) => getEntity(context, "accept"),
-          //  }),
-          //},
-          //{
-          //  target: "init",
-          //  cond: (context) => !!getEntity(context, "decline"),
-          //  actions: assign({
-          //    accept: (context) => getEntity(context, "decline"),
-          //  }),
-          //},
           {
             target: "meeting.when",
             cond: (context) => (context.nluResult.prediction.entities[0].category) === "accept",
@@ -99,7 +93,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
             target: "init",
             cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
             actions: assign({
-              decline: (context) => (context.nluResult.prediction.entities[0].text),
+              accept: (context) => (context.nluResult.prediction.entities[0].text),
             }),
           },
           {
@@ -116,13 +110,24 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         understood: {
           invoke: {
             src: (context, event) => kbRequest(context.title),
-            onDone: [{
+            // Where would the result of kbRequest go if we hadn't used the condition?
+            onDone: [
+              {
               target: "speak_request",
               cond: (context, event) => event.data.Abstract !== "",
               actions: assign({
                request: (context, event) => event.data }),
-            }],
+            },
+            {
+              target: "no_query_match",
+              cond: (context, event) => event.data.Abstract === "",
+            }
+           ],
           },
+        },
+        no_query_match: {
+          entry: say("There seem to be no results for that."),
+          on: { ENDSPEECH: "question" }
         },
         speak_request: {
           entry: send((context) => ({
@@ -150,6 +155,10 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
       on: {
         RECOGNISED: [
           {
+            target: ".nomatch",
+            cond: (context) => (context.nluResult.prediction.entities.length) === 0,
+          },
+          {
             target: ".when",
             cond: (context) => (context.nluResult.prediction.entities[0].category) === "meeting",
             actions: assign({
@@ -164,38 +173,10 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
             }),
           },
           {
-            target: ".time",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
-            actions: assign({
-              decline: (context) => (context.nluResult.prediction.entities[0].text),
-            }),
-          },
-          {
-            target: ".finalized",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === "accept",
-            actions: assign({
-              accept: (context) => (context.nluResult.prediction.entities[0].text),
-            }),
-          },
-          {
             target: ".confirmation",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === ("time"),
+            cond: (context) => (context.nluResult.prediction.entities[0].category) === "time",
             actions: assign({
               time: (context) => (context.nluResult.prediction.entities[0].text),
-            }),
-          },
-          {
-            target: ".finalized",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === "accept",
-            actions: assign({
-              accept: (context) => (context.nluResult.prediction.entities[0].text),
-            }),
-          },
-          {
-            target: ".what",
-            cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
-            actions: assign({
-              decline: (context) => (context.nluResult.prediction.entities[0].text),
             }),
           },
           {
@@ -217,23 +198,145 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           on: { ENDSPEECH: "ask" } 
         },
         whole_day: {
-          entry: say("Will it take the whole day?"),
-          on: { ENDSPEECH: "ask" } 
+          initial: "whole_day_confirmation",
+          on: {
+            RECOGNISED: [
+              {
+                target: ".nomatch",
+                cond: (context) => (context.nluResult.prediction.entities.length) === 0,
+              },
+              {
+                target: "time",
+                cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
+                actions: assign({
+                  decline: (context) => (context.nluResult.prediction.entities[0].text),
+                }),
+              },
+              {
+                target: ".confirm",
+                cond: (context) => (context.nluResult.prediction.entities[0].category) === "accept",
+                actions: assign({
+                  accept: (context) => (context.nluResult.prediction.entities[0].text),
+                }),
+              }, 
+              {
+                target: ".nomatch",
+              },
+            ]
+          },
+          states: {
+            whole_day_confirmation: {
+              entry: say("Will it take the whole day?"),
+              on: { ENDSPEECH: "ask" } 
+            },
+            ask: {
+              entry: send("LISTEN"),
+            },
+            nomatch: {
+              entry: sayErrorBack,
+              on: { ENDSPEECH: "ask" },
+            },
+            confirm: {
+              initial: "ask_confirmation",
+              on: {
+                RECOGNISED: [
+                  {
+                    target: ".nomatch",
+                    cond: (context) => (context.nluResult.prediction.entities.length) === 0,
+                  },
+                  {
+                    target: "#root.dm.meeting.start_meeting",
+                    cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
+                    actions: assign({
+                      decline: (context) => (context.nluResult.prediction.entities[0].text),
+                    }),
+                  },
+                  {
+                    target: ".finalized",
+                    cond: (context) => (context.nluResult.prediction.entities[0].category) === "accept",
+                    actions: assign({
+                      accept: (context) => (context.nluResult.prediction.entities[0].text),
+                    }),
+                  }, 
+                  {
+                    target: ".nomatch",
+                  },
+                ]
+              },
+              states: {
+                ask_confirmation: {
+                  entry: send((context) => ({
+                    type: "SPEAK",
+                    value: `Do you want me to create a meeting titled ${context.title} on ${context.day} ?`,
+                  })),
+                  on: { ENDSPEECH: "ask" } 
+                },
+                ask: {
+                  entry: send("LISTEN"),
+                },
+                nomatch: {
+                  entry: sayErrorBack,
+                  on: { ENDSPEECH: "ask" },
+                },
+                finalized: {
+                  entry: say("Your meeting has been created!"),
+                  on: { ENDSPEECH: "#root.dm.init" }
+                }
+              },
+            }
+          },
         },
         time: {
           entry: say("What time is your meeting?"),
           on: { ENDSPEECH: "ask" } 
         },
         confirmation: {
-          entry: send((context) => ({
-            type: "SPEAK",
-            value: `Do you want me to create a meeting titled ${context.title} on ${context.day} at ${context.time}`,
-          })),
-          on: { ENDSPEECH: "ask" } 
-        },
-        finalized: {
-          entry: say("Your meeting has been created!"),
-          //on: { ENDSPEECH: "init" }
+          initial: "meeting_confirmation",
+          on: {
+            RECOGNISED: [
+              {
+                target: ".nomatch",
+                cond: (context) => (context.nluResult.prediction.entities.length) === 0,
+              },
+              {
+                target: "#root.dm.meeting.start_meeting",
+                cond: (context) => (context.nluResult.prediction.entities[0].category) === "decline",
+                actions: assign({
+                  decline: (context) => (context.nluResult.prediction.entities[0].text),
+                }),
+              },
+              {
+                target: ".finalized",
+                cond: (context) => (context.nluResult.prediction.entities[0].category) === "accept",
+                actions: assign({
+                  accept: (context) => (context.nluResult.prediction.entities[0].text),
+                }),
+              }, 
+              {
+                target: ".nomatch",
+              },
+            ]
+          },
+          states: {
+            meeting_confirmation: {
+              entry: send((context) => ({
+                type: "SPEAK",
+                value: `Do you want me to create a meeting titled ${context.title} on ${context.day} at ${context.time}`,
+              })),
+              on: { ENDSPEECH: "ask" } 
+            },
+            ask: {
+              entry: send("LISTEN"),
+            },
+            nomatch: {
+              entry: sayErrorBack,
+              on: { ENDSPEECH: "ask" },
+            },
+            finalized: {
+              entry: say("Your meeting has been created!"),
+              on: { ENDSPEECH: "#root.dm.init" }
+            },
+          },
         },
         ask: {
           entry: send("LISTEN"),
