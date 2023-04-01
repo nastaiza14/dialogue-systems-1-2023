@@ -110,7 +110,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
         understood: {
           invoke: {
             src: (context, event) => kbRequest(context.title),
-            // Where would the result of kbRequest go if we hadn't used the condition?
             onDone: [
               {
               target: "speak_request",
@@ -147,7 +146,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           entry: sayErrorBack,
           on: { ENDSPEECH: "ask" },
         },
-        // information: {}
       },
     },
     meeting: {
