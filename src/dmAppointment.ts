@@ -41,7 +41,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           },
           {
             target: "query",
-            cond: (context) => (context.nluResult.prediction.topIntent) === "query",
+            cond: (context) => (context.nluResult.prediction.topIntent) === "query" && (context.nluResult.prediction.entities[0].category) === "question",
           },
           { 
             target: "meeting",
