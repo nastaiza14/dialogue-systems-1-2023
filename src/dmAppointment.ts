@@ -192,7 +192,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           on: { ENDSPEECH: "ask" }
         },
         when: {
-          entry: say("On what day?"),
+          entry: say("On what day of the week?"),
           on: { ENDSPEECH: "ask" } 
         },
         whole_day: {
@@ -285,7 +285,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = {
           },
         },
         time: {
-          entry: say("What time is your meeting?"),
+          entry: say("What time is your meeting? Say \" at \" and then the hour."),
           on: { ENDSPEECH: "ask" } 
         },
         confirmation: {
